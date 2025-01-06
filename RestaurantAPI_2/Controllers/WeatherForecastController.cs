@@ -49,5 +49,15 @@ namespace RestaurantAPI_2.Controllers
 
             return NotFound($"Hello {name} 2");
         }
+
+        [HttpPost("generate")] // [HttpPost("generate/{take}")]
+        public ActionResult<IEnumerable<WeatherForecast>> Generate([FromBody] TemperatureDemand weather, [FromQuery] int take)
+        {
+            if (!weather.ValidateTemperature || take < 0) return StatusCode(400, $"{ (!weather.ValidateTemperature ? "TemperaturaMax musi byæ wiêksza od TemperaturyMin\n" : "")}{(take < 0 ? "Liczba zwracanych elementów musi byæ wiêksza od 0" :"")}" );
+
+            var result = Ok(_service.Get(take, weather.TemperatureMax, weather.TemperatureMin));
+
+            return result;
+        }
     }
 }
