@@ -27,8 +27,8 @@ namespace RestaurantAPI_2.Entities
             modelBuilder.Entity<Dish>().Property(d => d.Name).IsRequired(false);
             modelBuilder.Entity<Dish>().Property(d => d.Description).IsRequired(false);
 
-            modelBuilder.Entity<Address>().Property(a => a.City).IsRequired(false);
-            modelBuilder.Entity<Address>().Property(a => a.Street).IsRequired(false);
+            modelBuilder.Entity<Address>().Property(a => a.City).IsRequired(false).HasMaxLength(50);
+            modelBuilder.Entity<Address>().Property(a => a.Street).IsRequired(false).HasMaxLength(50);
             modelBuilder.Entity<Address>().Property(a => a.PostalCode).IsRequired(false);
         }
         /// <summary>

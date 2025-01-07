@@ -10,7 +10,9 @@ namespace RestaurantAPI_2
         {
             _dbContext = dbContext;
         }
-
+        /// <summary>
+        /// Metoda dodająca dane do tabel na bazie danych
+        /// </summary>
         public void Seed()
         {
             if (_dbContext.Database.CanConnect())
