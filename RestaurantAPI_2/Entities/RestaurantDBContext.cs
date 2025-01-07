@@ -17,10 +17,19 @@ namespace RestaurantAPI_2.Entities
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            modelBuilder.Entity<Restaurant>().Property(r => r.Name).IsRequired().HasMaxLength(25);
-            modelBuilder.Entity<Dish>().Property(d => d.Name).IsRequired();
+            modelBuilder.Entity<Restaurant>().Property(r => r.Name).IsRequired(false).HasMaxLength(25);
+            modelBuilder.Entity<Restaurant>().Property(r => r.Description).IsRequired(false);
+            modelBuilder.Entity<Restaurant>().Property(r => r.Category).IsRequired(false);
+            modelBuilder.Entity<Restaurant>().Property(r => r.ContactNumber).IsRequired(false);
+            modelBuilder.Entity<Restaurant>().Property(r => r.ContactEmail).IsRequired(false);
+            //modelBuilder.Entity<Restaurant>().Property(r => r.Dishes).IsRequired(false);
 
-            //base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Dish>().Property(d => d.Name).IsRequired(false);
+            modelBuilder.Entity<Dish>().Property(d => d.Description).IsRequired(false);
+
+            modelBuilder.Entity<Address>().Property(a => a.City).IsRequired(false);
+            modelBuilder.Entity<Address>().Property(a => a.Street).IsRequired(false);
+            modelBuilder.Entity<Address>().Property(a => a.PostalCode).IsRequired(false);
         }
         /// <summary>
         /// Tworzenie połąćzenia z bazą danych
