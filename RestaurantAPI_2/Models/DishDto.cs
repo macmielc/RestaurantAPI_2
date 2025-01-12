@@ -1,6 +1,6 @@
-﻿namespace RestaurantAPI_2.Entities
+﻿namespace RestaurantAPI_2.Models
 {
-    public class Dish
+    public class DishDto
     {
         public int Id { get; set; }
 
@@ -9,9 +9,5 @@
         public string? Description { get; set; }
 
         public decimal Price { get; set; } = 0;
-
-        public int RestaurantId { get; set; }
-
-        public Restaurant Restaurant { get; set; }
     }
 }

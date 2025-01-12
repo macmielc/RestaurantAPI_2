@@ -1,5 +1,6 @@
 ﻿
 using RestaurantAPI_2.Entities;
+using RestaurantAPI_2.Services;
 
 namespace RestaurantAPI_2
 {
@@ -18,12 +19,15 @@ namespace RestaurantAPI_2
             //services.AddScoped<IStartup, Startup>(); 
             #region Rejestracja serwisów
             // 
-            services.AddTransient<IWeatherForcastService, WeatherForcastService>();
+            
             services.AddControllers();
             // Resjstrowania kontekstu bazy danych
             services.AddDbContext<RestaurantDBContext>();
             // Rejestracja Seedera
             services.AddScoped<RestaurantSeeder>();
+            // Metoda rozszerzająca (z namespace AutoMapper) do której musimy przekazać assembly w którym AutoMapper przeszuka wszystkie typy aby móc je rzutować.
+            services.AddAutoMapper(this.GetType().Assembly);
+            services.AddScoped<IRestaurantService, RestaurantService>();
             #endregion
         }
 

@@ -25,6 +25,6 @@ namespace RestaurantAPI_2.Entities
         [Required(AllowEmptyStrings = true)]
         public string? PostalCode { get; set; }
 
-        public Restaurant? Restaurant { get; set; }
+        public Restaurant Restaurant { get; set; }
     }
 }
