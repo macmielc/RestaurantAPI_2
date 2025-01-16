@@ -9,8 +9,8 @@ namespace RestaurantAPI_2.Services
 
         int Create(CreateRestaurantDto dto);
 
-        bool Delete(int id);
+        void Delete(int id);
 
-        bool Update(UpdateRestaurantDto dto, int id);
+        void Update(UpdateRestaurantDto dto, int id);
     }
 }

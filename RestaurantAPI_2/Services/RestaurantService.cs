@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantAPI_2.Entities;
+using RestaurantAPI_2.Exceptions;
 using RestaurantAPI_2.Models;
 
 namespace RestaurantAPI_2.Services
@@ -26,7 +27,7 @@ namespace RestaurantAPI_2.Services
                 Include(r => r.Dishes).
                 FirstOrDefault(r => r.Id == id);
 
-            if (restaurant is null) return null;
+            if (restaurant is null) throw new NotFoundException("Restaurant not found");
 
             var restaurantDto = _mapper.Map<RestaurantDto>(restaurant);
 
@@ -56,27 +57,25 @@ namespace RestaurantAPI_2.Services
         }
 
 
-        public bool Delete(int id)
+        public void Delete(int id)
         {
             _logger.LogError($"Restaurant with id: {id} DELETE action invoked");
 
             var restaurant = _dbCOntext.Restaurants.
                 FirstOrDefault(r => r.Id == id);
 
-            if (restaurant is null) return false;
+            if (restaurant is null) throw new NotFoundException("Restaurant not found");
 
             _dbCOntext.Remove(restaurant);
             _dbCOntext.SaveChanges();
-
-            return true;
         }
 
-        public bool Update(UpdateRestaurantDto dto, int id)
+        public void Update(UpdateRestaurantDto dto, int id)
         {
             var restaurant = _dbCOntext.Restaurants.
                 FirstOrDefault(r => r.Id == id);
 
-            if (restaurant is null) return false;
+            if (restaurant is null) throw new NotFoundException("Restaurant not found");
             // Zmiana wartości
             restaurant.Name = dto.Name;
             restaurant.Description = dto.Description;
@@ -84,8 +83,6 @@ namespace RestaurantAPI_2.Services
             // Zaktualizowanie wartości
             _dbCOntext.Update(restaurant); // nie jest konieczne wystarczy samo _dbCOntext.SaveChanges();
             _dbCOntext.SaveChanges();
-            // Zwracanie potwierdzenia zapisania zmian
-            return true;
         }
     }
 }
