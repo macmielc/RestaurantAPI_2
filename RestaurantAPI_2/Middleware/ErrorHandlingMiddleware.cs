@@ -3,11 +3,11 @@ using RestaurantAPI_2.Exceptions;
 
 namespace RestaurantAPI_2.Middlewere
 {
-    public class ErrorHandlingMiddlewere : IMiddleware
+    public class ErrorHandlingMiddleware : IMiddleware
     {
-        ILogger<ErrorHandlingMiddlewere> _logger;
+        ILogger<ErrorHandlingMiddleware> _logger;
 
-        public ErrorHandlingMiddlewere(ILogger<ErrorHandlingMiddlewere> logger)
+        public ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger)
         {
             _logger = logger;
         }

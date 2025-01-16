@@ -29,7 +29,9 @@ namespace RestaurantAPI_2
             // Metoda rozszerzająca (z namespace AutoMapper) do której musimy przekazać assembly w którym AutoMapper przeszuka wszystkie typy aby móc je rzutować.
             services.AddAutoMapper(this.GetType().Assembly);
             services.AddScoped<IRestaurantService, RestaurantService>();
-            services.AddScoped<ErrorHandlingMiddlewere>();
+            services.AddScoped<ErrorHandlingMiddleware>();
+            services.AddScoped<RequestTimeMiddleware>();
+            services.AddSwaggerGen(); // Dodawanie swaggera
             #endregion
         }
         /// <summary>
@@ -49,10 +51,17 @@ namespace RestaurantAPI_2
             }
             // Wstawienie Middlewarea na koniec spowodowało by że instrukcja try cacth była by pomijan w kodzie a błędy nie były by przechwytywane 
             // dlatego należy zadbać o odpowiednią koilejność
-            app.UseMiddleware<ErrorHandlingMiddlewere>();
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+            app.UseMiddleware<RequestTimeMiddleware>();
 
             app.UseHttpsRedirection(); // Jeżeli klient wysle zapytanie na http zostanie przekirowane na https
-            
+            app.UseSwagger(); //Metoda odpowiedzialna za stworzenie pliku json na potrzeby swaggera
+            app.UseSwaggerUI(c =>       // Deklrowanie loklizacji dokumnetacji
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "RestaurantAPI_2");
+                
+            });
+
             app.UseRouting();
 
             //app.UseAuthorization();
