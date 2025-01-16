@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RestaurantAPI_2;
+using NLog.Web;
 
 namespace RestaurantAPI_2
 {
@@ -45,7 +46,7 @@ namespace RestaurantAPI_2
             {
                 webBuilder.UseStartup<Startup>();
 
-            });
-            //.UseNLog();
+            })
+           .UseNLog();
     }
 }

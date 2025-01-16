@@ -1,5 +1,6 @@
 ﻿
 using RestaurantAPI_2.Entities;
+using RestaurantAPI_2.Middlewere;
 using RestaurantAPI_2.Services;
 
 namespace RestaurantAPI_2
@@ -28,9 +29,15 @@ namespace RestaurantAPI_2
             // Metoda rozszerzająca (z namespace AutoMapper) do której musimy przekazać assembly w którym AutoMapper przeszuka wszystkie typy aby móc je rzutować.
             services.AddAutoMapper(this.GetType().Assembly);
             services.AddScoped<IRestaurantService, RestaurantService>();
+            services.AddScoped<ErrorHandlingMiddlewere>();
             #endregion
         }
-
+        /// <summary>
+        /// Jak ma przebiegać zapytanie
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
+        /// <param name="seeder"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestaurantSeeder seeder) //, RestaurantSeeder seeder)
         {
             // Proces seedowania - wstrzykujemy serwis seedujacy RestaurantSeeder
@@ -40,6 +47,9 @@ namespace RestaurantAPI_2
             {
                 app.UseDeveloperExceptionPage();
             }
+            // Wstawienie Middlewarea na koniec spowodowało by że instrukcja try cacth była by pomijan w kodzie a błędy nie były by przechwytywane 
+            // dlatego należy zadbać o odpowiednią koilejność
+            app.UseMiddleware<ErrorHandlingMiddlewere>();
 
             app.UseHttpsRedirection(); // Jeżeli klient wysle zapytanie na http zostanie przekirowane na https
             

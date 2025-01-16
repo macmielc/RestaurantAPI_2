@@ -8,15 +8,16 @@ namespace RestaurantAPI_2.Services
 {
     public class RestaurantService : IRestaurantService
     {
-        private RestaurantDBContext _dbCOntext;
-        private IMapper _mapper;
+        private readonly RestaurantDBContext _dbCOntext;
+        private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
-        public RestaurantService(RestaurantDBContext dBContext, IMapper mapper)
+        public RestaurantService(RestaurantDBContext dBContext, IMapper mapper, ILogger<RestaurantService> logger)
         {
             _dbCOntext = dBContext;
             _mapper = mapper;
+            _logger = logger;
         }
-
 
         public RestaurantDto GetById(int id)
         {
@@ -44,7 +45,6 @@ namespace RestaurantAPI_2.Services
             return restaurantDtos;
         }
 
-
         public int Create(CreateRestaurantDto dto)
         {
             var restaurant = _mapper.Map<Restaurant>(dto);
@@ -53,6 +53,39 @@ namespace RestaurantAPI_2.Services
             _dbCOntext.SaveChanges();
 
             return restaurant.Id;
+        }
+
+
+        public bool Delete(int id)
+        {
+            _logger.LogError($"Restaurant with id: {id} DELETE action invoked");
+
+            var restaurant = _dbCOntext.Restaurants.
+                FirstOrDefault(r => r.Id == id);
+
+            if (restaurant is null) return false;
+
+            _dbCOntext.Remove(restaurant);
+            _dbCOntext.SaveChanges();
+
+            return true;
+        }
+
+        public bool Update(UpdateRestaurantDto dto, int id)
+        {
+            var restaurant = _dbCOntext.Restaurants.
+                FirstOrDefault(r => r.Id == id);
+
+            if (restaurant is null) return false;
+            // Zmiana wartości
+            restaurant.Name = dto.Name;
+            restaurant.Description = dto.Description;
+            restaurant.HasDelivery = dto.HasDelivery;
+            // Zaktualizowanie wartości
+            _dbCOntext.Update(restaurant); // nie jest konieczne wystarczy samo _dbCOntext.SaveChanges();
+            _dbCOntext.SaveChanges();
+            // Zwracanie potwierdzenia zapisania zmian
+            return true;
         }
     }
 }

@@ -51,5 +51,39 @@ namespace RestaurantAPI_2.Controllers
 
             return Ok(restaurant);
         }
+
+
+        [HttpDelete("{id}")]
+        public ActionResult<RestaurantDto> Delete([FromRoute] int id)
+        {
+            var isDeleted = _restaruantService.Delete(id);
+            // Weryfikacja czy restauracja została usunięta
+            if (isDeleted)
+            {
+                return NoContent();
+            }
+
+            return NotFound();
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult Update([FromBody] UpdateRestaurantDto dto, [FromRoute] int id)
+        {
+            // Walidowanie porpawności danych przesyłanych do zapisania
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            // Weryfikacja zapisania zmian związanych z edycją restauracji
+            var isUpdated = _restaruantService.Update(dto, id);
+            
+            if (!isUpdated)
+            {
+                // Zwracanie informacji o niepowodzeniu zapisu edycji reatauracji
+                return NotFound();
+            }
+            // Zwracanie informacji o powodzeniu zapisu edycji reatauracji
+            return Ok();
+        }
     } 
 }
