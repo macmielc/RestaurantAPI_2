@@ -27,6 +27,10 @@ namespace RestaurantAPI_2
                     PostalCode = dto.PostalCode
                 }));
 
+
+            // Jeżeli Dish i Dish mają takie same nazwy właściwości to nie trzeba ich mapować gdyż maper same je przepisze
+            CreateMap<CreateDishDto, Dish>();
+
         }
     }
 }
