@@ -11,6 +11,6 @@ namespace RestaurantAPI_2.Services
         List<DishDto> GetAll(int restaurantId);
         void RemoveAll(int restaurantId);
 
-        void Remove(int dishId);
+        void Remove(int restaurantId, int dishId);
     }
 }

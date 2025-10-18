@@ -4,11 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using RestaurantAPI_2.Entities;
 using RestaurantAPI_2.Models;
 using RestaurantAPI_2.Services;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RestaurantAPI_2.Controllers
 {
     [Route("api/restaurant")]
     [ApiController] // jezeli przyjdzie jakiekolwiek zapytanie automatycznie zostanie zwrócona informacja o błędach walidacji. Dlatego można usunąć kod !ModelState.IsValid
+    [Authorize] // < autoryzacja dla całego kontrolera
     public class RestaurantController : ControllerBase
     {
         private IRestaurantService _restaruantService;
@@ -18,15 +21,17 @@ namespace RestaurantAPI_2.Controllers
             _restaruantService = restaruantService;
         }
         [HttpPost]
+        [Authorize(Roles= "Admin,Manager")]
         public ActionResult CreateRestaurant([FromBody] CreateRestaurantDto dto)
         {
+
             int id = _restaruantService.Create(dto);
             // Zwracanie wyników z url do danychy do zapytania o stworzona restauracje i zapisaną na BD 
             return Created($"/app/restaurant/{id}", null);
         }
 
-
         [HttpGet()]
+        //[Authorize] // < autoryzacja dla danej metody
         public ActionResult<IEnumerable<RestaurantDto>> GetAll()
         {
             var restaurantDtos = _restaruantService.GetAll();
@@ -34,14 +39,14 @@ namespace RestaurantAPI_2.Controllers
             return Ok(restaurantDtos);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}")] 
+        [AllowAnonymous] // < nie podelga autoryzacji wynikającej z wymogu nałożonego na cała klasę
         public ActionResult<RestaurantDto> Get([FromRoute] int id)
         {
             var restaurant = _restaruantService.GetById(id);
             // Zwracanie wyników. Brak restauracji o danym id jest obsługiwamny w metodzie serwisu GetById(id);
             return Ok(restaurant);
         }
-
 
         [HttpDelete("{id}")]
         public ActionResult<RestaurantDto> Delete([FromRoute] int id)

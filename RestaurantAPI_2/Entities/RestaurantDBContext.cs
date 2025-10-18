@@ -10,12 +10,22 @@ namespace RestaurantAPI_2.Entities
         public DbSet<Address> Address { get; set; } 
 
         public DbSet<Dish> Dishes { get; set; }
+
+        public DbSet<Role > Roles { get; set; }
+
+        public DbSet<User> Users { get; set; }  
         /// <summary>
-        /// Tworzenie bazy danych
+        /// Tworzenie bazy danych konfiguracja kolumn tabel
         /// </summary>
         /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>().Property(r => r.Email).IsRequired();
+            //modelBuilder.Entity<User>().Property(r => r.FirstName).IsRequired(false);
+            //modelBuilder.Entity<User>().Property(r => r.LastName).IsRequired(false);
+            //modelBuilder.Entity<User>().Property(r => r.Name).IsRequired(false);
+
+            modelBuilder.Entity<Role>().Property(r => r.Name).IsRequired(true);
 
             modelBuilder.Entity<Restaurant>().Property(r => r.Name).IsRequired(false).HasMaxLength(25);
             modelBuilder.Entity<Restaurant>().Property(r => r.Description).IsRequired(false);
@@ -30,6 +40,8 @@ namespace RestaurantAPI_2.Entities
             modelBuilder.Entity<Address>().Property(a => a.City).IsRequired(false).HasMaxLength(50);
             modelBuilder.Entity<Address>().Property(a => a.Street).IsRequired(false).HasMaxLength(50);
             modelBuilder.Entity<Address>().Property(a => a.PostalCode).IsRequired(false);
+        
+
         }
         /// <summary>
         /// Tworzenie połąćzenia z bazą danych

@@ -18,6 +18,11 @@ namespace RestaurantAPI_2.Middlewere
             {
                 await next.Invoke(context);
             }
+            catch (BadRequestException ex)
+            {
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsync(ex.Message);
+            }
             catch (NotFoundException ex)
             {
                 // Dodawanie do logów informacji nie jest potrzebne

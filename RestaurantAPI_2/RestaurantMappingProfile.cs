@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using RestaurantAPI_2.Entities;
 using RestaurantAPI_2.Models;
+using RestaurantAPI_2.Models.Validators;
 
 namespace RestaurantAPI_2
 {
@@ -30,6 +31,9 @@ namespace RestaurantAPI_2
 
             // Jeżeli Dish i Dish mają takie same nazwy właściwości to nie trzeba ich mapować gdyż maper same je przepisze
             CreateMap<CreateDishDto, Dish>();
+
+            //CreateMap<RegisterUserDtoValidator, User>()
+            //    .ForMember(u => u.e, d => d.MapFrom(s => s))
 
         }
     }

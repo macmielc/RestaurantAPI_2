@@ -17,13 +17,26 @@ namespace RestaurantAPI_2
         {
             if (_dbContext.Database.CanConnect())
             {
-                if(!_dbContext.Restaurants.Any())
+                if (!_dbContext.Roles.Any())
                 {
-                    var restaurants = GetRestaurants();
-                    _dbContext.Restaurants.AddRange(restaurants);
+                    var roles = GetRole();
+                    _dbContext.Roles.AddRange(roles);
+
                     // Zapisywanie zmian na kontekscie bazy danych
                     _dbContext.SaveChanges();
                 }
+
+
+                if (!_dbContext.Restaurants.Any())
+                {
+                    var restaurants = GetRestaurants();
+                    _dbContext.Restaurants.AddRange(restaurants);
+
+                    // Zapisywanie zmian na kontekscie bazy danych
+                    _dbContext.SaveChanges();
+                }
+
+                
             }
         }
 
@@ -88,6 +101,28 @@ namespace RestaurantAPI_2
             };
 
             return resturants;
+        }
+
+
+        private IEnumerable<Role> GetRole()
+        {
+            var roles = new List<Role>()
+            {
+                new Role()
+                {
+                    Name = "Admin"
+                },
+                new Role()
+                {
+                    Name = "User"
+                },
+                new Role()
+                {
+                    Name = "Manager"
+                },
+            };
+
+            return roles;
         }
     }
 }
