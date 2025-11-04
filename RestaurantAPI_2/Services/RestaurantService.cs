@@ -16,13 +16,16 @@ namespace RestaurantAPI_2.Services
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
         private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public RestaurantService(RestaurantDBContext dBContext, IMapper mapper, ILogger<RestaurantService> logger, IAuthorizationService authorizationService)
+        public RestaurantService(RestaurantDBContext dBContext, IMapper mapper, ILogger<RestaurantService> logger,
+            IAuthorizationService authorizationService, IUserContextService userContextService)
         {
             _dbCOntext = dBContext;
             _mapper = mapper;
             _logger = logger;
             _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public RestaurantDto GetById(int id)
@@ -51,10 +54,10 @@ namespace RestaurantAPI_2.Services
             return restaurantDtos;
         }
 
-        public int Create(CreateRestaurantDto dto, int userId)
+        public int Create(CreateRestaurantDto dto)
         {
             var restaurant = _mapper.Map<Restaurant>(dto);
-            restaurant.CreatedById = userId;
+            restaurant.CreatedById = _userContextService.GetUserId;// było userId;
             _dbCOntext.Restaurants.Add(restaurant);
             _dbCOntext.SaveChanges();
 
@@ -62,7 +65,7 @@ namespace RestaurantAPI_2.Services
         }
 
 
-        public void Delete(int id, ClaimsPrincipal user)
+        public void Delete(int id)
         {
             _logger.LogError($"Restaurant with id: {id} DELETE action invoked");
 
@@ -72,7 +75,8 @@ namespace RestaurantAPI_2.Services
 
             if (restaurant is null) throw new NotFoundException("Restaurant not found");
             // weryfikacja czy użytkonik jest zautoryzowany do danej czynności
-            var authorizationResult = _authorizationService.AuthorizeAsync(user, restaurant, new ResourcesOperationRequirements(ResourcesOperation.Delete)).Result;
+            // było             var authorizationResult = _authorizationService.AuthorizeAsync(user, restaurant, new ResourcesOperationRequirements(ResourcesOperation.Delete)).Result;
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, restaurant, new ResourcesOperationRequirements(ResourcesOperation.Delete)).Result;
             // w przypadku braku autoryzacji zwracanie informacji 403
             if (!authorizationResult.Succeeded)
             {
@@ -83,7 +87,7 @@ namespace RestaurantAPI_2.Services
             _dbCOntext.SaveChanges();
         }
 
-        public void Update(UpdateRestaurantDto dto, int id, ClaimsPrincipal user)
+        public void Update(UpdateRestaurantDto dto, int id)
         {
             
 
@@ -92,7 +96,8 @@ namespace RestaurantAPI_2.Services
 
             if (restaurant is null) throw new NotFoundException("Restaurant not found");
 
-            var authorizationResult = _authorizationService.AuthorizeAsync(user, restaurant, new ResourcesOperationRequirements(ResourcesOperation.Update)).Result;
+            // było var authorizationResult = _authorizationService.AuthorizeAsync(user, restaurant, new ResourcesOperationRequirements(ResourcesOperation.Update)).Result;
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, restaurant, new ResourcesOperationRequirements(ResourcesOperation.Update)).Result;
 
             if (!authorizationResult.Succeeded)
             {

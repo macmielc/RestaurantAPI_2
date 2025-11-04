@@ -25,16 +25,17 @@ namespace RestaurantAPI_2.Controllers
         [Authorize(Roles = "Admin,Manager")]
         public ActionResult CreateRestaurant([FromBody] CreateRestaurantDto dto)
         {
-            int userId = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            int id = _restaruantService.Create(dto, userId);
+            // w związku z wdrożeniem IUserContextService int userId = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            int id = _restaruantService.Create(dto);
             // Zwracanie wyników z url do danychy do zapytania o stworzona restauracje i zapisaną na BD 
             return Created($"/app/restaurant/{id}", null);
         }
 
         [HttpGet()]
         [Authorize(Roles ="Admin,Manager")]
-        [Authorize(Policy = "HasNationality")]
-        [Authorize(Policy = "AtLeast20")]
+        //[Authorize(Policy = "HasNationality")]
+        //[Authorize(Policy = "AtLeast20")]
+        [Authorize(Policy = "MinRestaurantNr")]
         public ActionResult<IEnumerable<RestaurantDto>> GetAll()
         {
             var restaurantDtos = _restaruantService.GetAll();
@@ -54,7 +55,7 @@ namespace RestaurantAPI_2.Controllers
         [HttpDelete("{id}")]
         public ActionResult<RestaurantDto> Delete([FromRoute] int id)
         {
-            _restaruantService.Delete(id, User);
+            _restaruantService.Delete(id);
             // Weryfikacja czy restauracja została usunięta. Brak restauracji o danym id jest obsługiwamny w metodzie serwisu Delete(id);
             return NoContent();
         }
@@ -63,7 +64,7 @@ namespace RestaurantAPI_2.Controllers
         public ActionResult Update([FromBody] UpdateRestaurantDto dto, [FromRoute] int id)
         {
             // Weryfikacja zapisania zmian związanych z edycją restauracji
-            _restaruantService.Update(dto, id, User);
+            _restaruantService.Update(dto, id);
             // Zwracanie informacji o powodzeniu zapisu edycji reatauracji. Brak restauracji o danym id jest obsługiwamny w metodzie serwisu Update(dto, id);
             return Ok();
         }

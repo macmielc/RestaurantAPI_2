@@ -56,14 +56,17 @@ namespace RestaurantAPI_2
                     options.AddPolicy("HasNationality", builder =>
                         builder.RequireClaim("Nationality", new string[] {"Poland", "Dutch"})); // prywatna polityka z wartościami które musi spełniać
                     options.AddPolicy("AtLeast20", builder => builder.AddRequirements(new MinimumAgeRequirement(20)));
+                    options.AddPolicy("MinRestaurantNr", builder => builder.AddRequirements(new RestaurantNumberRequirement(2)));
                 });
             #endregion
             // Na jedno zapyatnie jedną instancję
             //services.AddScoped<IStartup, Startup>(); 
             #region Rejestracja serwisów
             // 
+            services.AddScoped<IAuthorizationHandler, RestaurantNumberRequirementHandler>(); // rozdział 47
             services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
             services.AddScoped<IAuthorizationHandler, ResourcesOperationRequirementsHandler>(); // nie tworzymy prywatnej polityki
+            
             services.AddControllers();// - https://github.com/FluentValidation/FluentValidation/issues/1965 nie powinno być używane .AddFluentValidation(); 
             //Dodawanie Fluent Walidatora.AddFluentValidation();
             services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
