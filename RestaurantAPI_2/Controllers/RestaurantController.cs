@@ -6,32 +6,35 @@ using RestaurantAPI_2.Models;
 using RestaurantAPI_2.Services;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace RestaurantAPI_2.Controllers
 {
     [Route("api/restaurant")]
     [ApiController] // jezeli przyjdzie jakiekolwiek zapytanie automatycznie zostanie zwrócona informacja o błędach walidacji. Dlatego można usunąć kod !ModelState.IsValid
-    [Authorize] // < autoryzacja dla całego kontrolera
+    //[Authorize] // < autoryzacja dla całego kontrolera
     public class RestaurantController : ControllerBase
     {
         private IRestaurantService _restaruantService;
 
-        public RestaurantController(IRestaurantService restaruantService)
+        public RestaurantController(IRestaurantService restaruantService )
         {
             _restaruantService = restaruantService;
         }
         [HttpPost]
-        [Authorize(Roles= "Admin,Manager")]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult CreateRestaurant([FromBody] CreateRestaurantDto dto)
         {
-
-            int id = _restaruantService.Create(dto);
+            int userId = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            int id = _restaruantService.Create(dto, userId);
             // Zwracanie wyników z url do danychy do zapytania o stworzona restauracje i zapisaną na BD 
             return Created($"/app/restaurant/{id}", null);
         }
 
         [HttpGet()]
-        //[Authorize] // < autoryzacja dla danej metody
+        [Authorize(Roles ="Admin,Manager")]
+        [Authorize(Policy = "HasNationality")]
+        [Authorize(Policy = "AtLeast20")]
         public ActionResult<IEnumerable<RestaurantDto>> GetAll()
         {
             var restaurantDtos = _restaruantService.GetAll();
@@ -40,7 +43,7 @@ namespace RestaurantAPI_2.Controllers
         }
 
         [HttpGet("{id}")] 
-        [AllowAnonymous] // < nie podelga autoryzacji wynikającej z wymogu nałożonego na cała klasę
+        //[AllowAnonymous] // < nie podelga autoryzacji wynikającej z wymogu nałożonego na cała klasę
         public ActionResult<RestaurantDto> Get([FromRoute] int id)
         {
             var restaurant = _restaruantService.GetById(id);
@@ -51,7 +54,7 @@ namespace RestaurantAPI_2.Controllers
         [HttpDelete("{id}")]
         public ActionResult<RestaurantDto> Delete([FromRoute] int id)
         {
-            _restaruantService.Delete(id);
+            _restaruantService.Delete(id, User);
             // Weryfikacja czy restauracja została usunięta. Brak restauracji o danym id jest obsługiwamny w metodzie serwisu Delete(id);
             return NoContent();
         }
@@ -60,7 +63,7 @@ namespace RestaurantAPI_2.Controllers
         public ActionResult Update([FromBody] UpdateRestaurantDto dto, [FromRoute] int id)
         {
             // Weryfikacja zapisania zmian związanych z edycją restauracji
-            _restaruantService.Update(dto, id);
+            _restaruantService.Update(dto, id, User);
             // Zwracanie informacji o powodzeniu zapisu edycji reatauracji. Brak restauracji o danym id jest obsługiwamny w metodzie serwisu Update(dto, id);
             return Ok();
         }

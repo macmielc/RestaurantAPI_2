@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RestaurantAPI_2.Authorization;
 using RestaurantAPI_2.Entities;
 using RestaurantAPI_2.Exceptions;
 using RestaurantAPI_2.Models;
+using System.Security.Claims;
 
 namespace RestaurantAPI_2.Services
 {
@@ -12,12 +15,14 @@ namespace RestaurantAPI_2.Services
         private readonly RestaurantDBContext _dbCOntext;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
+        private readonly IAuthorizationService _authorizationService;
 
-        public RestaurantService(RestaurantDBContext dBContext, IMapper mapper, ILogger<RestaurantService> logger)
+        public RestaurantService(RestaurantDBContext dBContext, IMapper mapper, ILogger<RestaurantService> logger, IAuthorizationService authorizationService)
         {
             _dbCOntext = dBContext;
             _mapper = mapper;
             _logger = logger;
+            _authorizationService = authorizationService;
         }
 
         public RestaurantDto GetById(int id)
@@ -46,10 +51,10 @@ namespace RestaurantAPI_2.Services
             return restaurantDtos;
         }
 
-        public int Create(CreateRestaurantDto dto)
+        public int Create(CreateRestaurantDto dto, int userId)
         {
             var restaurant = _mapper.Map<Restaurant>(dto);
-
+            restaurant.CreatedById = userId;
             _dbCOntext.Restaurants.Add(restaurant);
             _dbCOntext.SaveChanges();
 
@@ -57,25 +62,42 @@ namespace RestaurantAPI_2.Services
         }
 
 
-        public void Delete(int id)
+        public void Delete(int id, ClaimsPrincipal user)
         {
             _logger.LogError($"Restaurant with id: {id} DELETE action invoked");
 
             var restaurant = _dbCOntext.Restaurants.
                 FirstOrDefault(r => r.Id == id);
 
+
             if (restaurant is null) throw new NotFoundException("Restaurant not found");
+            // weryfikacja czy użytkonik jest zautoryzowany do danej czynności
+            var authorizationResult = _authorizationService.AuthorizeAsync(user, restaurant, new ResourcesOperationRequirements(ResourcesOperation.Delete)).Result;
+            // w przypadku braku autoryzacji zwracanie informacji 403
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
 
             _dbCOntext.Remove(restaurant);
             _dbCOntext.SaveChanges();
         }
 
-        public void Update(UpdateRestaurantDto dto, int id)
+        public void Update(UpdateRestaurantDto dto, int id, ClaimsPrincipal user)
         {
+            
+
             var restaurant = _dbCOntext.Restaurants.
                 FirstOrDefault(r => r.Id == id);
 
             if (restaurant is null) throw new NotFoundException("Restaurant not found");
+
+            var authorizationResult = _authorizationService.AuthorizeAsync(user, restaurant, new ResourcesOperationRequirements(ResourcesOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
             // Zmiana wartości
             restaurant.Name = dto.Name;
             restaurant.Description = dto.Description;

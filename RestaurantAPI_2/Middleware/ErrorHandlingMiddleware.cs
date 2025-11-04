@@ -29,6 +29,14 @@ namespace RestaurantAPI_2.Middlewere
                 // _logger.LogError(ex, ex.Message);
 
                 context.Response.StatusCode = 404;
+                //await context.Response.WriteAsync(ex.Message);
+            }
+            catch (ForbidException ex)
+            {
+                // Dodawanie do logów informacji nie jest potrzebne
+                // _logger.LogError(ex, ex.Message);
+
+                context.Response.StatusCode = 403;
                 await context.Response.WriteAsync(ex.Message);
             }
             catch (Exception ex) 
@@ -38,6 +46,7 @@ namespace RestaurantAPI_2.Middlewere
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsync("Something went wrong");
             }
+
         }
     }
 }

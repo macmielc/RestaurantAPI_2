@@ -79,8 +79,13 @@ namespace RestaurantAPI_2.Services
                 new Claim(ClaimTypes.Name,$"{user.FirstName} {user.LastName}"),
                 new Claim(ClaimTypes.Role, user.Role.Name),
                 new Claim("DateOfBirth", user.DateOfBirth.Value.ToString("yyyy-MM-dd")),
-                new Claim("Nationality", user.Nationality),
             };
+            // Nie wymagane calimy
+            if(!string.IsNullOrEmpty(user.Nationality))
+            {
+                claims.Add(
+                    new Claim("Nationality", user.Nationality));
+            }
 
             // Nalezy najpierw stworzyc kluczp prywatny
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtKey));
@@ -88,10 +93,10 @@ namespace RestaurantAPI_2.Services
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now.AddDays(_settings.JwtExpireDays);
             // Tworzenie tokena Jwt
-            var token = new JwtSecurityToken(_settings.JwtIssuer, 
+            var token = new JwtSecurityToken(_settings.JwtIssuer,
                 _settings.JwtIssuer, 
-                claims, 
-                expires, 
+                claims,
+                expires: expires, 
                 signingCredentials:  cred);
             // Generowanie stringa reprezentującego JwtToken
             var tokenHandler = new JwtSecurityTokenHandler();

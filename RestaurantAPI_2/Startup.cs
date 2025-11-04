@@ -1,8 +1,10 @@
 ﻿
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using RestaurantAPI_2.Authorization;
 using RestaurantAPI_2.Entities;
 using RestaurantAPI_2.Middlewere;
 using RestaurantAPI_2.Models;
@@ -47,12 +49,21 @@ namespace RestaurantAPI_2
 
                     };
                 });
+
+            // rejestrowania customowej polityki autoryzacji
+            services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("HasNationality", builder =>
+                        builder.RequireClaim("Nationality", new string[] {"Poland", "Dutch"})); // prywatna polityka z wartościami które musi spełniać
+                    options.AddPolicy("AtLeast20", builder => builder.AddRequirements(new MinimumAgeRequirement(20)));
+                });
             #endregion
             // Na jedno zapyatnie jedną instancję
             //services.AddScoped<IStartup, Startup>(); 
             #region Rejestracja serwisów
             // 
-
+            services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
+            services.AddScoped<IAuthorizationHandler, ResourcesOperationRequirementsHandler>(); // nie tworzymy prywatnej polityki
             services.AddControllers();// - https://github.com/FluentValidation/FluentValidation/issues/1965 nie powinno być używane .AddFluentValidation(); 
             //Dodawanie Fluent Walidatora.AddFluentValidation();
             services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
@@ -70,6 +81,8 @@ namespace RestaurantAPI_2
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
             services.AddScoped<RequestTimeMiddleware>();
+            services.AddScoped<IUserContextService, UserContextService>();
+            services.AddHttpContextAccessor(); // Dzieki temu możemy wstrzyknąć od UserContextService IHttpContextAccessor
             services.AddSwaggerGen(); // Dodawanie swaggera
             #endregion
         }
