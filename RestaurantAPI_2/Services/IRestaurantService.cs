@@ -6,7 +6,7 @@ namespace RestaurantAPI_2.Services
     public interface IRestaurantService
     {
         RestaurantDto GetById(int id);
-        IEnumerable<RestaurantDto> GetAll();
+        PageResult<RestaurantDto> GetAll(RestaurantQuery query);
 
         int Create(CreateRestaurantDto dto);
 

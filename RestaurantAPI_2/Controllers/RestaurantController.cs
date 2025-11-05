@@ -32,13 +32,13 @@ namespace RestaurantAPI_2.Controllers
         }
 
         [HttpGet()]
-        [Authorize(Roles ="Admin,Manager")]
+        [Authorize(Roles = "Admin,Manager")]
         //[Authorize(Policy = "HasNationality")]
         //[Authorize(Policy = "AtLeast20")]
         [Authorize(Policy = "MinRestaurantNr")]
-        public ActionResult<IEnumerable<RestaurantDto>> GetAll()
+        public ActionResult<IEnumerable<RestaurantDto>> GetAll([FromQuery] RestaurantQuery query)
         {
-            var restaurantDtos = _restaruantService.GetAll();
+            var restaurantDtos = _restaruantService.GetAll(query);
 
             return Ok(restaurantDtos);
         }
