@@ -88,6 +88,18 @@ namespace RestaurantAPI_2
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddHttpContextAccessor();  // Dzieki temu możemy wstrzyknąć od UserContextService IHttpContextAccessor
             services.AddSwaggerGen();           // Dodawanie swaggera
+            #region CORS
+            services.AddCors(options =>
+            {
+                options.AddPolicy("FrontEndClient", builder =>
+                    builder.AllowAnyMethod()    // dopuszczenie jakiejkolwiek metody http (get, post, put, delete itd.)
+                        .AllowAnyHeader()       // dopuszczenie jakiegokolwiek nagłówka http
+                                                // Mozna (nalezy) przenieść dopuszczalne domeny do pliku  appsetting.json
+                        .WithOrigins(configRoot["AllowedOrigines"])); //, "http://localhost:8080/" })); // AllowAnyOrigin - pozwala na dostęp z każdego adresu, WithOrigins - pozwala tylko z określonego adresu
+                        //.AllowAnyOrigin()           // dopuszczenie jakiegokolwiek adresu (nie jest zalecane w produkcji)
+            });
+            #endregion
+
             #endregion
         }
         /// <summary>
@@ -98,6 +110,9 @@ namespace RestaurantAPI_2
         /// <param name="seeder"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestaurantSeeder seeder) //, RestaurantSeeder seeder)
         {
+            // Uruchomienie polityki CORS
+            app.UseCors("FrontEndClient"); // Nazwa polityki którą chcemy uruchomić
+
             // Proces seedowania - wstrzykujemy serwis seedujacy RestaurantSeeder
             seeder.Seed();  
 
@@ -113,7 +128,7 @@ namespace RestaurantAPI_2
 
             app.UseHttpsRedirection();  // Jeżeli klient wysle zapytanie na http zostanie przekirowane na https
             app.UseSwagger();           // Metoda odpowiedzialna za stworzenie pliku json na potrzeby swaggera
-            app.UseSwaggerUI(c =>       // Deklrowanie loklizacji dokumnetacji oraz konfiguracja swaggera
+            app.UseSwaggerUI(c =>       // Deklrowanie loklizacji dokumnetacji oraz konfiguracja swaggera http://localhost:5101/swagger/index.html
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "RestaurantAPI_2");              
             });

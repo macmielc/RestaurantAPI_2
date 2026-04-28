@@ -24,6 +24,7 @@ namespace RestaurantAPI_2.Controllers
         }
 
         [HttpPost("login")]
+        // balbiLubiSzczekac3
         public ActionResult LoginUser([FromBody] LoginDto dto)
         {
             string token = _accountService.GenerateJwtToken(dto);
