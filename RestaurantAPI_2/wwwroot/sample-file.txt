@@ -1,0 +1,1 @@
+This is a sample file that is included in the wwwroot folder of the RestaurantAPI project. It can be used for testing purposes or as a placeholder for actual content that will be served to clients. The wwwroot folder is typically used to store static files such as images, CSS, JavaScript, and other assets that need to be accessible to clients.

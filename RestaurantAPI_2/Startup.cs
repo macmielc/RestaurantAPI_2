@@ -110,6 +110,7 @@ namespace RestaurantAPI_2
         /// <param name="seeder"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestaurantSeeder seeder) //, RestaurantSeeder seeder)
         {
+            app.UseStaticFiles(); // Dodanie obsługi plików statycznych (np. zdjęć) - domyślnie szuka katalogu wwwroot
             // Uruchomienie polityki CORS
             app.UseCors("FrontEndClient"); // Nazwa polityki którą chcemy uruchomić
 
