@@ -1,5 +1,4 @@
-﻿
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -70,6 +69,14 @@ namespace RestaurantAPI_2
             services.AddControllers();// - https://github.com/FluentValidation/FluentValidation/issues/1965 nie powinno być używane .AddFluentValidation(); 
             //Dodawanie Fluent Walidatora.AddFluentValidation();
             services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
+
+            // DODANIE: Konfiguracja Response Caching
+            services.AddResponseCaching(options =>
+            {
+                options.MaximumBodySize = 1024; // Maksymalny rozmiar cache'owanej odpowiedzi w bajtach
+                options.UseCaseSensitivePaths = true; // Uwzględnianie wielkości liter w ścieżkach
+            });
+
             // Resjstrowania kontekstu bazy danych
             services.AddDbContext<RestaurantDBContext>();
             // Rejestracja Seedera
@@ -110,6 +117,7 @@ namespace RestaurantAPI_2
         /// <param name="seeder"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestaurantSeeder seeder) //, RestaurantSeeder seeder)
         {
+            app.UseResponseCaching(); // Dodanie obsługi cache'owania odpowiedzi
             app.UseStaticFiles(); // Dodanie obsługi plików statycznych (np. zdjęć) - domyślnie szuka katalogu wwwroot
             // Uruchomienie polityki CORS
             app.UseCors("FrontEndClient"); // Nazwa polityki którą chcemy uruchomić

@@ -6,9 +6,11 @@ namespace RestaurantAPI_2.Controllers
 {
     [ApiController]
     [Route("file")] // bez api aby oddzielić logike obsługi plików od logiki obsługi restauracji
-    [Authorize]
+    //[Authorize]
     public class FileController : ControllerBase
     {
+        [HttpGet]
+        [ResponseCache(Duration = 1200, VaryByQueryKeys = new[] { "fileName" })] // Cache'owanie odpowiedzi na 60 sekund, co może poprawić wydajność przy wielokrotnych żądaniach tego samego pliku w krótkim czasie.
         public IActionResult GetFile([FromQuery] string fileName)
         {
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "PrivateFiles", fileName);
@@ -18,16 +20,19 @@ namespace RestaurantAPI_2.Controllers
                 return NotFound();
             }
 
-           
             var fileBytes = System.IO.File.ReadAllBytes(filePath); // fileContent
 
             var contentTypeProvider = new FileExtensionContentTypeProvider();
             contentTypeProvider.TryGetContentType(fileName, out string contentType); // próba określenia typu MIME na podstawie rozszerzenia pliku. Jeśli nie uda się określić typu, contentType będzie null.
 
-            if (contentType == null)
-            {
-                contentType = "application/octet-stream"; // Można dostosować typ MIME w zależności od rodzaju pliku
-            }
+            //if (contentType == null)
+            //{
+            //    contentType = "application/octet-stream"; // Można dostosować typ MIME w zależności od rodzaju pliku
+            //}
+
+            // Dodanie jawnych nagłówków cache
+            Response.Headers["Cache-Control"] = "public, max-age=1200";
+            Response.Headers["Vary"] = "fileName";
 
             return File(fileBytes, contentType, fileName);  // Stosujemy File zamiast Ok() aby zwrócić plik do pobrania. W ten sposób przeglądarka będzie wiedziała, że ma do czynienia z plikiem i umożliwi użytkownikowi jego pobranie.
         }

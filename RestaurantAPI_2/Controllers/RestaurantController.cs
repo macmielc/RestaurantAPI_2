@@ -13,6 +13,7 @@ namespace RestaurantAPI_2.Controllers
     [Route("api/restaurant")]
     [ApiController] // jezeli przyjdzie jakiekolwiek zapytanie automatycznie zostanie zwrócona informacja o błędach walidacji. Dlatego można usunąć kod !ModelState.IsValid
     //[Authorize] // < autoryzacja dla całego kontrolera
+
     public class RestaurantController : ControllerBase
     {
         private IRestaurantService _restaruantService;
