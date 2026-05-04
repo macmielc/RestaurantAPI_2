@@ -2,6 +2,7 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RestaurantAPI_2.Authorization;
 using RestaurantAPI_2.Entities;
@@ -78,7 +79,7 @@ namespace RestaurantAPI_2
             });
 
             // Resjstrowania kontekstu bazy danych
-            services.AddDbContext<RestaurantDBContext>();
+            services.AddDbContext<RestaurantDBContext>(options => options.UseSqlServer(configRoot.GetConnectionString("DefaultConnectionDB")));
             // Rejestracja Seedera
             services.AddScoped<RestaurantSeeder>();
             // Metoda rozszerzająca (z namespace AutoMapper) do której musimy przekazać assembly w którym AutoMapper przeszuka wszystkie typy aby móc je rzutować.

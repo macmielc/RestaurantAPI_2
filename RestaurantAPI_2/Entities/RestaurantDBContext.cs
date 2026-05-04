@@ -4,7 +4,16 @@ namespace RestaurantAPI_2.Entities
 {
     public class RestaurantDBContext : DbContext
     {
-        private string _conectionstring = "Server=(localdb)\\mssqllocaldb;Database=RestaurantDb2;Trusted_Connection=True;";
+        // Usuniete w dniu 20260502 - refkatoring - przeniesienie do appsettings.json na potrzeby Azure
+        //private string _conectionstring = "Server=(localdb)\\mssqllocaldb;Database=RestaurantDb2;Trusted_Connection=True;";
+
+        public RestaurantDBContext(DbContextOptions<RestaurantDBContext> options) : base(options)
+        {
+            
+
+        }
+
+
         public DbSet<Restaurant> Restaurants { get; set; }
         
         public DbSet<Address> Address { get; set; } 
@@ -43,15 +52,16 @@ namespace RestaurantAPI_2.Entities
         
 
         }
-        /// <summary>
-        /// Tworzenie połąćzenia z bazą danych
-        /// </summary>
-        /// <param name="optionsBuilder"></param>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(_conectionstring);
-           // base.OnConfiguring(optionsBuilder);
-        }
+        // Usuniete w dniu 20260502 - refkatoring - przeniesienie do appsettings.json na potrzeby Azure
+        ///// <summary>
+        ///// Tworzenie połączenia z bazą danych
+        ///// </summary>
+        ///// <param name="optionsBuilder"></param>
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer(_conectionstring);
+        //   // base.OnConfiguring(optionsBuilder);
+        //}
 
     }
 }

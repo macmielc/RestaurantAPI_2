@@ -1,4 +1,5 @@
-﻿using RestaurantAPI_2.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using RestaurantAPI_2.Entities;
 
 namespace RestaurantAPI_2
 {
@@ -17,6 +18,15 @@ namespace RestaurantAPI_2
         {
             if (_dbContext.Database.CanConnect())
             {
+
+                var pendingMigrations = _dbContext.Database.GetPendingMigrations();
+
+                // Sprawdzenie czy istnieją jakieś niezaaplikowane migracje
+                if (pendingMigrations != null && pendingMigrations.Any())
+                {
+                    _dbContext.Database.Migrate(); // Zastosowanie wszystkich niezaaplikowanych migracji
+                }
+
                 if (!_dbContext.Roles.Any())
                 {
                     var roles = GetRole();
