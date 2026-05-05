@@ -10,9 +10,7 @@ namespace RestaurantAPI_2.Entities
         public RestaurantDBContext(DbContextOptions<RestaurantDBContext> options) : base(options)
         {
             
-
         }
-
 
         public DbSet<Restaurant> Restaurants { get; set; }
         

@@ -79,7 +79,7 @@ namespace RestaurantAPI_2
             });
 
             // Resjstrowania kontekstu bazy danych
-            services.AddDbContext<RestaurantDBContext>(options => options.UseSqlServer(configRoot.GetConnectionString("DefaultConnectionDB")));
+            services.AddDbContext<RestaurantDBContext>(options => options.UseSqlServer(configRoot.GetConnectionString("DevelopmentConnectionDB")));
             // Rejestracja Seedera
             services.AddScoped<RestaurantSeeder>();
             // Metoda rozszerzająca (z namespace AutoMapper) do której musimy przekazać assembly w którym AutoMapper przeszuka wszystkie typy aby móc je rzutować.
@@ -103,7 +103,7 @@ namespace RestaurantAPI_2
                     builder.AllowAnyMethod()    // dopuszczenie jakiejkolwiek metody http (get, post, put, delete itd.)
                         .AllowAnyHeader()       // dopuszczenie jakiegokolwiek nagłówka http
                                                 // Mozna (nalezy) przenieść dopuszczalne domeny do pliku  appsetting.json
-                        .WithOrigins(configRoot["AllowedOrigines"])); //, "http://localhost:8080/" })); // AllowAnyOrigin - pozwala na dostęp z każdego adresu, WithOrigins - pozwala tylko z określonego adresu
+                        .WithOrigins(configRoot["AllowedOrigins"])); //, "http://localhost:8080/" })); // AllowAnyOrigin - pozwala na dostęp z każdego adresu, WithOrigins - pozwala tylko z określonego adresu
                         //.AllowAnyOrigin()           // dopuszczenie jakiegokolwiek adresu (nie jest zalecane w produkcji)
             });
             #endregion
