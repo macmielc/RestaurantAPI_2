@@ -16,10 +16,13 @@ namespace RestaurantAPI_2
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             configRoot = configuration;
+            _environment = environment;
         }
+
+        private readonly IWebHostEnvironment _environment;
 
         public IConfiguration configRoot { get; }
 
@@ -78,10 +81,12 @@ namespace RestaurantAPI_2
                 options.UseCaseSensitivePaths = true; // Uwzględnianie wielkości liter w ścieżkach
             });
 
-            // Resjstrowania kontekstu bazy danych
-            services.AddDbContext<RestaurantDBContext>(options => options.UseSqlServer(configRoot.GetConnectionString("DevelopmentConnectionDB")));
+            // Rejestracja kontekstu bazy danych z automatyczną migracją
+            services.AddDbContext<RestaurantDBContext>(
+                options => options.UseSqlServer(_environment.IsDevelopment() ? configRoot.GetConnectionString("DevelopmentConnectionDB") : configRoot.GetConnectionString("RestaurantDbConnection")));
             // Rejestracja Seedera
             services.AddScoped<RestaurantSeeder>();
+
             // Metoda rozszerzająca (z namespace AutoMapper) do której musimy przekazać assembly w którym AutoMapper przeszuka wszystkie typy aby móc je rzutować.
             services.AddAutoMapper(this.GetType().Assembly);
             services.AddScoped<IAccountService,  AccountService>();
@@ -96,6 +101,7 @@ namespace RestaurantAPI_2
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddHttpContextAccessor();  // Dzieki temu możemy wstrzyknąć od UserContextService IHttpContextAccessor
             services.AddSwaggerGen();           // Dodawanie swaggera
+            #endregion
             #region CORS
             services.AddCors(options =>
             {
@@ -103,12 +109,11 @@ namespace RestaurantAPI_2
                     builder.AllowAnyMethod()    // dopuszczenie jakiejkolwiek metody http (get, post, put, delete itd.)
                         .AllowAnyHeader()       // dopuszczenie jakiegokolwiek nagłówka http
                                                 // Mozna (nalezy) przenieść dopuszczalne domeny do pliku  appsetting.json
-                        .WithOrigins(configRoot["AllowedOrigins"])); //, "http://localhost:8080/" })); // AllowAnyOrigin - pozwala na dostęp z każdego adresu, WithOrigins - pozwala tylko z określonego adresu
+                        .WithOrigins(configRoot["AllowedOrigins"] ?? "http://localhost:8080")); //, "http://localhost:8080/" })); // AllowAnyOrigin - pozwala na dostęp z każdego adresu, WithOrigins - pozwala tylko z określonego adresu
                         //.AllowAnyOrigin()           // dopuszczenie jakiegokolwiek adresu (nie jest zalecane w produkcji)
             });
             #endregion
-
-            #endregion
+            
         }
         /// <summary>
         /// Jak ma przebiegać zapytanie
@@ -116,7 +121,7 @@ namespace RestaurantAPI_2
         /// <param name="app"></param>
         /// <param name="env"></param>
         /// <param name="seeder"></param>
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestaurantSeeder seeder) //, RestaurantSeeder seeder)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestaurantSeeder seeder, RestaurantDBContext dbContext) //, RestaurantSeeder seeder)
         {
             app.UseResponseCaching(); // Dodanie obsługi cache'owania odpowiedzi
             app.UseStaticFiles(); // Dodanie obsługi plików statycznych (np. zdjęć) - domyślnie szuka katalogu wwwroot
@@ -124,7 +129,7 @@ namespace RestaurantAPI_2
             app.UseCors("FrontEndClient"); // Nazwa polityki którą chcemy uruchomić
 
             // Proces seedowania - wstrzykujemy serwis seedujacy RestaurantSeeder
-            seeder.Seed();  
+            seeder.Seed(env);  
 
             if (env.IsDevelopment())
             {
@@ -137,7 +142,9 @@ namespace RestaurantAPI_2
             app.UseAuthentication();
 
             app.UseHttpsRedirection();  // Jeżeli klient wysle zapytanie na http zostanie przekirowane na https
-            app.UseSwagger();           // Metoda odpowiedzialna za stworzenie pliku json na potrzeby swaggera
+            // Metoda odpowiedzialna za stworzenie pliku json na potrzeby swaggera
+            app.UseSwagger();
+            
             app.UseSwaggerUI(c =>       // Deklrowanie loklizacji dokumnetacji oraz konfiguracja swaggera http://localhost:5101/swagger/index.html
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "RestaurantAPI_2");              

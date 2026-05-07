@@ -23,13 +23,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog;
+using NLog.Web;
+using RestaurantAPI_2;
 //using NLog.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using RestaurantAPI_2;
-using NLog.Web;
 
 namespace RestaurantAPI_2
 {
@@ -37,7 +38,21 @@ namespace RestaurantAPI_2
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+            try
+            {
+                logger.Info("=== Uruchamianie aplikacji RestaurantAPI_2 ===");
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "!!! Aplikacja zatrzymana z powodu wyj¹tku !!!");
+                throw;
+            }
+            finally
+            {
+                NLog.LogManager.Shutdown();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

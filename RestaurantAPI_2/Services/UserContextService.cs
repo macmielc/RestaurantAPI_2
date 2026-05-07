@@ -3,7 +3,7 @@
 namespace RestaurantAPI_2.Services
 {
     /// <summary>
-    /// Udostępnianie infromacji o użytkwoniku w wymagany kontekscie i udostępnanie danych o użytkwonkiu
+    /// Udostępnianie informacji o użytkwoniku w wymagany kontekscie i udostępnanie danych o użytkwonkiu
     /// </summary>
     public class UserContextService : IUserContextService
     {
