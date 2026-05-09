@@ -1,0 +1,28 @@
+on:
+ push:
+   branches: [master] ## można elementy wypisac po myślnikach lub w tablicy [ ,]
+ pull_request:
+   branches: [master]
+ workflow_dispatch:
+
+jobs:
+  build: ## jedne jobs bo zwiera jeden bulid ale może zawierac więcej niż jendego job-a
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2 ## jakie konkretny templet ma być użyty
+      ##- name: Run a one-line script
+      ##  run: echo Hello, world
+      ##- name: Run a multi-line cript
+      ##  run: |
+      ##    echo Add other actions to build
+      ##    echo test, and deploy your project
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v5.2.0 ## pobranie dont neta
+        with:
+            dotnet-version: 8.0.x
+      - name: Restore dependencies
+        run : dotnet restore
+      - name: build
+        run: dotnet build -- no-Restore
+      ##- name: Test
+      ##  run: dont test
