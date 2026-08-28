@@ -1,5 +1,8 @@
 ﻿namespace RestaurantAPI_2.Models
 {
+    /// <summary>
+    /// Klasa reprezentująca zapytanie do wyszukiwania restauracji, zawierająca parametry takie jak fraza wyszukiwania, numer strony, rozmiar strony, sortowanie i kierunek sortowania.
+    /// </summary>
     public class RestaurantQuery
     {
         public string? SearchPhrase { get; set; }

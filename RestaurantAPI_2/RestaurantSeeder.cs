@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RestaurantAPI_2.Entities;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace RestaurantAPI_2
 {
@@ -21,6 +22,7 @@ namespace RestaurantAPI_2
         {
             try
             {
+                var connection = _dbContext.Database.GetDbConnection();
                 if (_dbContext.Database.CanConnect())
                 {
                     // AUTOMATYCZNA MIGRACJA BAZY DANYCH
@@ -73,6 +75,11 @@ namespace RestaurantAPI_2
                         _dbContext.SaveChanges();
                     }
 
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                    $"Brak połączenia z bazą. Server={connection.DataSource}, Database={connection.Database}");
                 }
             }
             catch (Exception ex)

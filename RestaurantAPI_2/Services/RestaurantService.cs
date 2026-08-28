@@ -29,7 +29,12 @@ namespace RestaurantAPI_2.Services
             _authorizationService = authorizationService;
             _userContextService = userContextService;
         }
-
+        /// <summary>
+        /// Wyszukianie restauracji po id i zwrócenie jej w postaci obiektu RestaurantDto
+        /// </summary>
+        /// <param name="id"><see cref="int"/> id restauracji</param>
+        /// <returns><see cref="RestaurantDto"/></returns>
+        /// <exception cref="NotFoundException"></exception>
         public RestaurantDto GetById(int id)
         {
             var restaurant = _dbCOntext.Restaurants.
@@ -44,6 +49,11 @@ namespace RestaurantAPI_2.Services
             return restaurantDto;
         }
         // public IEnumerable<RestaurantDto> GetAll(RestaurantQuery query)
+        /// <summary>
+        /// Wyszukiwanie restauracji po nazwie lub opisie i zwrócenie ich w postaci obiektu <see cref="PageResult{RestaurantDto}"/>
+        /// </summary>
+        /// <param name="query"><see cref="RestaurantQuery"/></param>
+        /// <returns><see cref="PageResult{RestaurantDto}"/></returns>
         public PageResult<RestaurantDto> GetAll(RestaurantQuery query)
         {
             var baseQuery = _dbCOntext.Restaurants
@@ -88,7 +98,11 @@ namespace RestaurantAPI_2.Services
 
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         public int Create(CreateRestaurantDto dto)
         {
             var restaurant = _mapper.Map<Restaurant>(dto);
@@ -99,7 +113,12 @@ namespace RestaurantAPI_2.Services
             return restaurant.Id;
         }
 
-
+        /// <summary>
+        /// Usuwanie restauracji po id, weryfikacja czy użytkownik jest autoryzowany do danej czynności
+        /// </summary>
+        /// <param name="id"></param>
+        /// <exception cref="NotFoundException"></exception>
+        /// <exception cref="ForbidException"></exception>
         public void Delete(int id)
         {
             _logger.LogError($"Restaurant with id: {id} DELETE action invoked");
@@ -121,7 +140,13 @@ namespace RestaurantAPI_2.Services
             _dbCOntext.Remove(restaurant);
             _dbCOntext.SaveChanges();
         }
-
+        /// <summary>
+        /// Edycja restauracji po id, weryfikacja czy użytkownik jest autoryzowany do danej czynności
+        /// </summary>
+        /// <param name="dto"><see cref="UpdateRestaurantDto"/> - obiekt zawierający dane do aktualizacji restauracji</param>
+        /// <param name="id"><see cref="int"/> id restauracji</param>
+        /// <exception cref="NotFoundException"></exception>
+        /// <exception cref="ForbidException"></exception>
         public void Update(UpdateRestaurantDto dto, int id)
         {
             

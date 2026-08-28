@@ -33,6 +33,23 @@ namespace RestaurantAPI_2
 
             configRoot.GetSection("Authentication").Bind(authenticationSettings);
 
+            if (string.IsNullOrWhiteSpace(authenticationSettings.JwtKey))
+            {
+                throw new InvalidOperationException("Brak konfiguracji Authentication:JwtKey.");
+            }
+
+            if (string.IsNullOrWhiteSpace(authenticationSettings.JwtIssuer))
+            {
+                throw new InvalidOperationException("Brak konfiguracji Authentication:JwtIssuer.");
+            }
+
+            if (authenticationSettings.JwtExpireDays <= 0)
+            {
+                throw new InvalidOperationException("Authentication:JwtExpireDays musi być > 0.");
+            }
+
+            configRoot.GetSection("Authentication").Bind(authenticationSettings);
+
             services.AddSingleton(authenticationSettings);
 
             services.AddAuthentication(option =>
@@ -81,9 +98,11 @@ namespace RestaurantAPI_2
                 options.UseCaseSensitivePaths = true; // Uwzględnianie wielkości liter w ścieżkach
             });
 
-            // Rejestracja kontekstu bazy danych z automatyczną migracją
+            // Rejestracja kontekstu bazy danych z automatyczną migracją // Poprawione 20260502
             services.AddDbContext<RestaurantDBContext>(
-                options => options.UseSqlServer(_environment.IsDevelopment() ? configRoot.GetConnectionString("DevelopmentConnectionDB") : configRoot.GetConnectionString("RestaurantDbConnection")));
+                options => options.UseSqlServer(_environment.IsDevelopment() ? 
+                configRoot.GetConnectionString("DevelopmentConnectionDB") : 
+                configRoot.GetConnectionString("RestaurantDbConnection")));
             // Rejestracja Seedera
             services.AddScoped<RestaurantSeeder>();
 
