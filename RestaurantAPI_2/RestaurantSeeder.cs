@@ -55,6 +55,7 @@ namespace RestaurantAPI_2
                     pendingMigrations.Count,
                     pendingMigrations.Any() ? string.Join(", ", pendingMigrations) : "<none>");
 
+
                 _dbContext.Database.Migrate();
                 _logger.LogInformation("[SEED] Migrate() zakończone.");
 
@@ -211,6 +212,38 @@ namespace RestaurantAPI_2
                         PostalCode = "30-001"
                     }
                 },
+                new Restaurant()
+                {
+                    Name = "Szczaw i Mirabelki",
+                    Category = "Kuchnia wegetariańska",
+                    Description = "McDonald's Coropration (McDonald's), incorporated on December 21, 1964, operates and franchises ... ",
+                    ContactEmail = "szaw&mirabelki@szczaw.com",
+                    HasDelivery = true,
+                    Dishes = new List<Dish>()
+                    {
+                        new Dish()
+                        {
+                            Name = "Sushi wege z avokado",
+                            Price = 39.30m
+                        },
+                        new Dish()
+                        {
+                            Name = "Sushi wege z mango",
+                            Price = 35.30m
+                        },
+                        new Dish()
+                        {
+                            Name = "Wege stripsy",
+                            Price = 28.00m
+                        },
+                    },
+                    Address = new Address()
+                    {
+                        City = "Poznań",
+                        Street = "Wojsciechowskiego 40",
+                        PostalCode = "60-681"
+                    }
+                },
             };
 
             return resturants;
@@ -231,6 +264,10 @@ namespace RestaurantAPI_2
                 new Role()
                 {
                     Name = "Manager"
+                },
+                new Role()
+                {
+                    Name = "Viwer"
                 },
             };
 
