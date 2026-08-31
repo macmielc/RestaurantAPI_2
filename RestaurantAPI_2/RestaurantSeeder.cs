@@ -20,71 +20,73 @@ namespace RestaurantAPI_2
         /// </summary>
         public void Seed(IWebHostEnvironment env)
         {
-            try
+
+            var connection = _dbContext.Database.GetDbConnection();
+            Console.WriteLine($"[SEED] Env={env.EnvironmentName}, Server={connection.DataSource}, Database={connection.Database}");
+
+            if (!_dbContext.Database.CanConnect())
             {
-                var connection = _dbContext.Database.GetDbConnection();
-                if (_dbContext.Database.CanConnect())
+                throw new InvalidOperationException(
+                    $"[SEED] Brak połączenia z bazą. Server={connection.DataSource}, Database={connection.Database}");
+            }
+
+
+            // AUTOMATYCZNA MIGRACJA BAZY DANYCH
+            var pendingMigrations = _dbContext.Database.GetPendingMigrations().ToList();
+            Console.WriteLine($"[SEED] Pending migrations: {pendingMigrations.Count}");
+
+
+            Console.WriteLine($"=== Próba migracji bazy danych wersja I ({(env.IsDevelopment() ? "Development local" : env.IsProduction() ? "Production - Azure SQL" : "Unknown")}) ===");
+            // Sprawdzenie czy istnieją jakieś niezaaplikowane migracje
+            if (pendingMigrations != null && pendingMigrations.Any())
+            {
+                try
                 {
-                    // AUTOMATYCZNA MIGRACJA BAZY DANYCH
-                    var pendingMigrations = _dbContext.Database.GetPendingMigrations();
-
-                    // Sprawdzenie czy istnieją jakieś niezaaplikowane migracje
-                    if (pendingMigrations != null && pendingMigrations.Any())
-                    {
-                        try
-                        {
-                            Console.WriteLine($"=== Rozpoczynam migrację bazy danych ({(env.IsDevelopment()? "Development local"  :  env.IsProduction() ? "Production - Azure SQL" : "Unknown")}) ===");
-                            _dbContext.Database.Migrate(); // Zastosowanie wszystkich niezaaplikowanych migracji
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"!!! BŁĄD MIGRACJI BAZY DANYCH: {ex.Message}");
-                            Console.WriteLine($"!!! Stack Trace: {ex.StackTrace}");
-                        }
-                        finally
-                        {
-                            Console.WriteLine($"=== Migracja bazy danych zakończona pomyślnie ({(env.IsDevelopment()? "Development local"  :  env.IsProduction() ? "Production - Azure SQL" : "Unknown")}) ===");
-                        }
-                    }
-
-                    if (!_dbContext.Roles.Any())
-                    {
-                        var roles = GetRole();
-                        _dbContext.Roles.AddRange(roles);
-
-                        // Zapisywanie zmian na kontekscie bazy danych
-                        _dbContext.SaveChanges();
-                    }
-
-
-                    if (!_dbContext.Restaurants.Any())
-                    {
-                        var restaurants = GetRestaurants();
-                        _dbContext.Restaurants.AddRange(restaurants);
-
-                        // Zapisywanie zmian na kontekscie bazy danych
-                        _dbContext.SaveChanges();
-                    }
-
-                    if (!_dbContext.Users.Any())
-                    {
-                        var users = GetUsers();
-                        _dbContext.Users.AddRange(users);
-
-                        // Zapisywanie zmian na kontekscie bazy danych
-                        _dbContext.SaveChanges();
-                    }
-
+                    Console.WriteLine($"=== Rozpoczynam migrację bazy danych ({(env.IsDevelopment() ? "Development local" : env.IsProduction() ? "Production - Azure SQL" : "Unknown")}) ===");
+                    _dbContext.Database.Migrate(); // Zastosowanie wszystkich niezaaplikowanych migracji
                 }
-                else
+                catch (Exception ex)
                 {
-                    throw new InvalidOperationException(
-                    $"Brak połączenia z bazą. Server={connection.DataSource}, Database={connection.Database}");
+                    Console.WriteLine($"!!! BŁĄD MIGRACJI BAZY DANYCH: {ex.Message}");
+                    Console.WriteLine($"!!! Stack Trace: {ex.StackTrace}");
+                }
+                finally
+                {
+                    Console.WriteLine($"=== Migracja bazy danych zakończona pomyślnie ({(env.IsDevelopment() ? "Development local" : env.IsProduction() ? "Production - Azure SQL" : "Unknown")}) ===");
                 }
             }
-            catch (Exception ex)
+
+            // Poprawka od Copilot-a
+            Console.WriteLine("Próba migracji bazy danych wersja II [SEED] Migrate() wykonane.");
+            _dbContext.Database.Migrate();
+            Console.WriteLine("[SEED] Migrate() wykonane.");
+
+            if (!_dbContext.Roles.Any())
             {
-                Console.WriteLine($"!!! BŁĄD SEEDOWANIA: {ex.Message}");
+                var roles = GetRole();
+                _dbContext.Roles.AddRange(roles);
+                // Zapisywanie zmian na kontekscie bazy danych
+                _dbContext.SaveChanges();
+                Console.WriteLine("[SEED] Dodano Roles.");
+            }
+
+
+            if (!_dbContext.Restaurants.Any())
+            {
+                var restaurants = GetRestaurants();
+                _dbContext.Restaurants.AddRange(restaurants);
+                // Zapisywanie zmian na kontekscie bazy danych
+                _dbContext.SaveChanges();
+                Console.WriteLine("[SEED] Dodano Restaurants.");
+            }
+
+            if (!_dbContext.Users.Any())
+            {
+                var users = GetUsers();
+                _dbContext.Users.AddRange(users);
+                // Zapisywanie zmian na kontekscie bazy danych
+                _dbContext.SaveChanges();
+                Console.WriteLine("[SEED] Dodano Users.");
             }
         }
 

@@ -102,7 +102,7 @@ namespace RestaurantAPI_2
             services.AddDbContext<RestaurantDBContext>(
                 options => options.UseSqlServer(_environment.IsDevelopment() ? 
                 configRoot.GetConnectionString("DevelopmentConnectionDB") : 
-                configRoot.GetConnectionString("RestaurantDbConnection")));
+                configRoot.GetConnectionString("RestaurantDBConnection")));
             // Rejestracja Seedera
             services.AddScoped<RestaurantSeeder>();
 
