@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RestaurantAPI_2.Entities;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Data.Common;
 
 namespace RestaurantAPI_2
 {
@@ -9,48 +10,105 @@ namespace RestaurantAPI_2
     {
         private readonly RestaurantDBContext _dbContext;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly ILogger<RestaurantSeeder> _logger;
 
-        public RestaurantSeeder(RestaurantDBContext dbContext, IPasswordHasher<User> passwordHasher)
+        public RestaurantSeeder(
+            RestaurantDBContext dbContext,
+            IPasswordHasher<User> passwordHasher,
+            ILogger<RestaurantSeeder> logger)
         {
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
+            _logger = logger;
         }
+
         /// <summary>
         /// Metoda dodająca dane do tabel na bazie danych
         /// </summary>
         public void Seed(IWebHostEnvironment env)
         {
             var connection = _dbContext.Database.GetDbConnection();
-            Console.WriteLine($"[SEED] Env={env.EnvironmentName}, Server={connection.DataSource}, Database={connection.Database}");
 
-            if (!_dbContext.Database.CanConnect())
+            _logger.LogInformation(
+                "[SEED] Start. Env={Env}, Server={Server}, Database={Database}, ConnectionType={Type}",
+                env.EnvironmentName,
+                connection.DataSource,
+                connection.Database,
+                connection.GetType().FullName);
+
+            try
             {
-                Console.WriteLine("[SEED] CanConnect=false. Pomijam migrację i seed.");
-                return;
+                if (!_dbContext.Database.CanConnect())
+                {
+                    _logger.LogError(
+                        "[SEED] CanConnect=false. Brak połączenia z bazą. Server={Server}, Database={Database}",
+                        connection.DataSource,
+                        connection.Database);
+
+                    return;
+                }
+
+                var pendingMigrations = _dbContext.Database.GetPendingMigrations().ToList();
+
+                _logger.LogInformation(
+                    "[SEED] Pending migrations count={Count}. Names={Names}",
+                    pendingMigrations.Count,
+                    pendingMigrations.Any() ? string.Join(", ", pendingMigrations) : "<none>");
+
+                _dbContext.Database.Migrate();
+                _logger.LogInformation("[SEED] Migrate() zakończone.");
+
+                if (!_dbContext.Roles.Any())
+                {
+                    _dbContext.Roles.AddRange(GetRole());
+                    _dbContext.SaveChanges();
+                    _logger.LogInformation("[SEED] Dodano dane domyślne do tabeli Roles.");
+                }
+
+                if (!_dbContext.Restaurants.Any())
+                {
+                    _dbContext.Restaurants.AddRange(GetRestaurants());
+                    _dbContext.SaveChanges();
+                    _logger.LogInformation("[SEED] Dodano dane domyślne do tabeli Restaurants.");
+                }
+
+                if (!_dbContext.Users.Any())
+                {
+                    _dbContext.Users.AddRange(GetUsers());
+                    _dbContext.SaveChanges();
+                    _logger.LogInformation("[SEED] Dodano dane domyślne do tabeli Users.");
+                }
+
+                _logger.LogInformation("[SEED] Koniec.");
             }
-
-            var pending = _dbContext.Database.GetPendingMigrations().ToList();
-            Console.WriteLine($"[SEED] Pending migrations: {pending.Count}");
-
-            _dbContext.Database.Migrate();
-            Console.WriteLine("[SEED] Migrate OK.");
-
-            if (!_dbContext.Roles.Any())
+            catch (SqlException ex)
             {
-                _dbContext.Roles.AddRange(GetRole());
-                _dbContext.SaveChanges();
+                _logger.LogError(ex,
+                    "[SEED][SQL] Number={Number}, State={State}, Class={Class}, Procedure={Procedure}, LineNumber={LineNumber}, Server={Server}, ConnectionId={ConnectionId}",
+                    ex.Number,
+                    ex.State,
+                    ex.Class,
+                    ex.Procedure,
+                    ex.LineNumber,
+                    ex.Server,
+                    ex.ClientConnectionId);
+
+                throw;
             }
-
-            if (!_dbContext.Restaurants.Any())
+            catch (DbException ex)
             {
-                _dbContext.Restaurants.AddRange(GetRestaurants());
-                _dbContext.SaveChanges();
+                _logger.LogError(ex,
+                    "[SEED][DB] Type={Type}, ErrorCode={ErrorCode}, Message={Message}",
+                    ex.GetType().FullName,
+                    ex.ErrorCode,
+                    ex.Message);
+
+                throw;
             }
-
-            if (!_dbContext.Users.Any())
+            catch (Exception ex)
             {
-                _dbContext.Users.AddRange(GetUsers());
-                _dbContext.SaveChanges();
+                _logger.LogError(ex, "[SEED] Nieoczekiwany błąd seedowania.");
+                throw;
             }
         }
 
@@ -58,7 +116,7 @@ namespace RestaurantAPI_2
         {
             var users = new List<User>()
             {
-                new User() // #1
+                new User()
                 {
                     Email = "jan.kowalski@example.com",
                     FirstName = "Jan",
@@ -67,7 +125,7 @@ namespace RestaurantAPI_2
                     Nationality = "Polish",
                     RoleId = 2
                 },
-                new User() // #2
+                new User()
                 {
                     Email = "marta.banyk@example.com",
                     FirstName = "Marta",
@@ -76,7 +134,7 @@ namespace RestaurantAPI_2
                     Nationality = "Polish",
                     RoleId = 1
                 },
-                new User() // #3
+                new User()
                 {
                     Email = "Balbina.mielcarek@example.com",
                     FirstName = "Balbina",
@@ -99,7 +157,7 @@ namespace RestaurantAPI_2
         {
             var resturants = new List<Restaurant>()
             {
-                new Restaurant() // #1
+                new Restaurant()
                 {
                     Name = "KFC",
                     Category = "Fast Food",
@@ -119,14 +177,14 @@ namespace RestaurantAPI_2
                             Price = 10.30m
                         },
                     },
-                    Address =  new Address()
+                    Address = new Address()
                     {
                         City = "Kraków",
                         Street = "Długa 5",
                         PostalCode = "30-301"
                     }
                 },
-                new Restaurant() // #2
+                new Restaurant()
                 {
                     Name = "McDonald",
                     Category = "Fast Food",
@@ -146,7 +204,7 @@ namespace RestaurantAPI_2
                             Price = 5.30m
                         },
                     },
-                    Address =  new Address()
+                    Address = new Address()
                     {
                         City = "Kraków",
                         Street = "Szewska 2",
@@ -157,7 +215,6 @@ namespace RestaurantAPI_2
 
             return resturants;
         }
-
 
         private IEnumerable<Role> GetRole()
         {
